@@ -16,7 +16,6 @@ public class Main {
         // to
         // one string which then gets redistributed when viewed
         ArrayList<String> cartItems = new ArrayList<>();
-        cartItems.add("Product^2478^Homemade PC^Item^1500^homemade pc I7-1500k, 4070ti, 1tb^U");
         ArrayList<String> categories = new ArrayList<String>();
 
         ArrayList<String> bookedSrve = new ArrayList<String>();
@@ -24,9 +23,13 @@ public class Main {
         // Listings
         ArrayList<String> listings = new ArrayList<>();
         // Presiquite
-        listings.add("Product^2478^Homemade PC^Item^1500^homemade pc I7-1500k, 4070ti, 1tb");
+        listings.add("School^9021^Homework^Dirty work^50^Il do your lab work, no chemistry, cash only!!");
+        listings.add("Electronics^2839^Build a pc^Item^230 + parts^Building pc's for your needs!");
+        listings.add("Vehicles^4521^2019 Honda Civic SI^Item^24000^Well kept, modded injectors + clean title!");
+        listings.add("DoItForMe^2381^Exterminator^Service^0.10perInsect^I kill insects, no cleanup sandle only");
         // Variable Tracks if the user is still "in" the app
         boolean notExited = true;
+        String currentlyViewingCat = "All";
         Scanner sc = new Scanner(System.in);
 
         ///
@@ -36,7 +39,7 @@ public class Main {
         for (int newestEntry = 0; newestEntry < 98; newestEntry = Integer.parseInt(sc.nextLine())) {
             //
             // switch case to select different options
-            // 0=MainMenu, 1=CartView, 2=AddService, 3=Browse market services,
+            // 0=MainMenu, 1=CartView, 2=AddService, 3=Browse market services, 4=Browse ordered service, 5=Exit
             if (notExited) {
                 switch (newestEntry) {
                     //
@@ -143,7 +146,7 @@ public class Main {
                                 System.out.flush();
                                 if (canCheckout && (cartItems.size() != 0)) {
                                     // if its finee
-                                    System.out.println("All selected services have been BOOKED!\n[2] Add service\n");
+                                    System.out.println("All selected services have been BOOKED!");
                                     bookedSrve.addAll(cartItems);
                                     cartItems.clear();
                                 } else if (!canCheckout) {
@@ -206,35 +209,38 @@ public class Main {
                         System.out.println("\n > Enter service catagory (it will create a new if it doesnt exist)");
                         String ServAddCat = sc.nextLine().replace("^", "");
 
+                        System.out.println("\n > Enter type of service (Item or Service)");
+                        String ServType = sc.nextLine();
+
                         System.out.println("\n > Description:");
                         String ServAddDesc = sc.nextLine().replace("^", "");
 
                         System.out.println("\n > Price? (you can do \"prHr\" or do not use \"$\"");
-                        String ServAddPrice = sc.nextLine();
+                        String ServAddPrice = sc.nextLine().replaceAll("$", "");
                         // Add an ID to listing
                         int listingADDID = (int) (Math.random() * 9999) + 1111;
                         // check if ID is already in use (chances of it being 2x is very low)
                         if (listings.contains(listingADDID)) {
                             listingADDID = (int) (Math.random() * 9999) + 1111;
                         }
+                        System.out.print("\033[H1\033[2J");
+                        System.out.flush();
                         // Add listing and print result!
-                        listings.add(String.format("%s^%s^%s^%s^%s^U", listingADDID, ServAddName, ServAddCat,
+                        listings.add(String.format("%s^%s^%s^%s^%s^%s^U", ServAddCat, listingADDID, ServAddName, ServType, ServAddPrice, ServAddDesc,
                                 ServAddPrice, ServAddDesc));
-                        System.out.println(
-                                String.format("Listing \"%s\" was created! (ID:%s)", ServAddName, listingADDID));
+                        System.out.println(String.format("Listing \"%s\" was created! (ID:%s)", ServAddName, listingADDID));
+                        System.out.println(String.format("\n[1] View cart (%s)\n[2] Add Listing\n[3] Browse market Services\n[4] Browse ordered Services (%s)\n[5] Exit",(cartItems.size()), (bookedSrve.size())));
 
                         break;
                     case 3:
                         // Re clear terminal
                         System.out.print("\033[H1\033[2J");
                         System.out.flush();
-                        // Variables Sorted + Temp
-                        String currentlyViewingCat = "All";
-                        int page = 0;
-                        int currentItemTrack = listings.size() - 1;
                         // Print *LISTINGS!!!*
+                        boolean itemsPrinted = false;
+                        System.out.println(String.format("C O M M U N I T Y   M A R K E T\n\nTracking %s listings | Currently browsing *%s*\n\n[1] Add item to cart (by ID)\n[2] Sort by catagory\n[0] Return to Main Menu\n______________________________________________", listings.size(), currentlyViewingCat));
                         for (String listingSelect : listings) {
-                            // listingSlelect5
+                            // printStuffBeforehand
                             int posNamount = 0;
                             String listingItemCat = "";
                             String listingItemCost = "";
@@ -242,6 +248,7 @@ public class Main {
                             String listingItemID = "";
                             String listingItemDesc = "";
                             String listingItemType = "";
+                            boolean isSelflisting = false;
                             for (int letterPOS = 0; letterPOS < listingSelect.length(); letterPOS++){
                                 if (listingSelect.charAt(letterPOS) == '^') {
                                     posNamount += 1;
@@ -267,68 +274,197 @@ public class Main {
                                             listingItemDesc += listingSelect.charAt(letterPOS);
                                             break;
                                         case 6:
+                                            isSelflisting = true;
                                             break;
                                     }
                                 }
                             }
                             // update items printed
-                             currentItemTrack++;
-                             System.out.println(String.format("%s\nID:%s\nName:%s\nCat:%s\nType:%s\nCost:%s\nDesc%s", (currentItemTrack), listingItemID, listingItemName, listingItemCat, listingItemType, listingItemCost, listingItemDesc));   
+                            // if statement is for catagories!
+
+                            if (currentlyViewingCat.toLowerCase().equals(listingItemCat.toLowerCase()) || currentlyViewingCat.toLowerCase().equals("all")) {
+                             if (!isSelflisting) {
+                                System.out.println(String.format("\n| %s : %s : $%s\n| %s\n| ID:%s : Catagory: %s", listingItemName, listingItemType ,listingItemCost, listingItemDesc, listingItemID, listingItemCat));
+                             } else if (isSelflisting) {
+                                System.out.println(String.format("\n| %s : %s : $%s\n| %s\n| ID:%s : Catagory: %s : This is your listing!", listingItemName, listingItemType ,listingItemCost, listingItemDesc, listingItemID, listingItemCat));
+                             }
+                             itemsPrinted = true;
+                            } else if (isSelflisting && currentlyViewingCat.toLowerCase().equals("mine")) {
+                                System.out.println(String.format("\n| %s : %s : $%s\n| %s\n| ID:%s : Catagory: %s : This is your listing!", listingItemName, listingItemType ,listingItemCost, listingItemDesc, listingItemID, listingItemCat));
+                                itemsPrinted = true;
+                            }
+                        }
+                        if (!itemsPrinted) {
+                           System.err.println("\nErr: Unable to find Items that fit catagory, are you sure its spelt correctly?");
+                        }
+                        // FollowUps
+                        switch (Integer.parseInt(sc.nextLine())) {
+                            case 1:
+                                // Add to cart!
+                                System.out.print("\033[H1\033[2J");
+                                System.out.flush();
+                                System.err.println("Adding Item to cart!\n\nID of Item:");
+                                String itemTobeAdded = sc.nextLine();
+                                boolean iteminCart = false;
+                            for (String cartSelect : cartItems) {
+                                if (cartSelect.contains(itemTobeAdded)) {
+                                    iteminCart = true;
+                                }
+                            }
+                            if (!iteminCart) {
+                                    boolean itemAddedtocart = false;
+                                    for (String listingSelect:listings) {
+                                        if (listingSelect.contains(itemTobeAdded)) {
+                                            cartItems.add(listingSelect);
+                                            System.out.print("\033[H1\033[2J");
+                                            System.out.flush();
+                                             System.err.println("Item Added to Cart!!!");
+                                            System.out.println(String.format(
+                                        "\n[1] View cart (%s)\n[2] Add Listing\n[3] Browse market Services\n[4] Browse ordered Services (%s)\n[5] Exit",
+                                        (cartItems.size()), (bookedSrve.size())));
+                                        itemAddedtocart = true;
+                                        }
+                                    }
+                                    if (!itemAddedtocart) {
+                                            System.out.print("\033[H1\033[2J");
+                                            System.out.flush();
+                                             System.err.println("Errr: Unable to add Item are you sure it exits?");
+                                            System.out.println(String.format(
+                                        "\n[1] View cart (%s)\n[2] Add Listing\n[3] Browse market Services\n[4] Browse ordered Services (%s)\n[5] Exit",
+                                        (cartItems.size()), (bookedSrve.size())));
+                                        }
+                                } else {
+                                    System.out.print("\033[H1\033[2J");
+                                    System.out.flush();
+                                    System.err.println("Err: Cannot add Item that is already in cart!");
+                                    // Invalid Info
+                                    System.out.println(String.format(
+                                        "\n[1] View cart (%s)\n[2] Add Listing\n[3] Browse market Services\n[4] Browse ordered Services (%s)\n[5] Exit",
+                                        (cartItems.size()), (bookedSrve.size())));
+                                }
+                            
+                            break;
+                            case 2:
+                                System.out.print("\033[H1\033[2J");
+                                System.out.flush();
+                                ArrayList<String> avaiableCats = new ArrayList<>();
+                                // Get catagories
+                                for (String selecListing:listings) {
+                                    String storeCat = "";
+                                    for (int charSelect = 0; (selecListing.charAt(charSelect) != '^') ; charSelect++) {
+                                        storeCat += selecListing.charAt(charSelect);
+                                    }
+                                    // Avoid Dupes
+                                    if (!avaiableCats.contains(storeCat)) {
+                                            avaiableCats.add(storeCat);
+                                    }
+                                }
+                                // Take Catagory
+                                System.out.println("Sort by Catagory:");
+                                System.out.println(String.format("\nDefualts: All, Mine\nCommunity: %s", avaiableCats));
+                                System.out.println("Type the catagory you want:");
+                                currentlyViewingCat = sc.nextLine();
+                                System.out.print("\033[H1\033[2J");
+                                System.out.flush();
+                                System.out.println("Listings Sorted! return to browser see changes!");
+                                System.out.println(String.format(
+                                        "\n[1] View cart (%s)\n[2] Add Listing\n[3] Browse market Services\n[4] Browse ordered Services (%s)\n[5] Exit",
+                                        (cartItems.size()), (bookedSrve.size())));
+
+                            break;
+                            case 0: 
+                                // Re clear terminal
+                                System.out.print("\033[H1\033[2J");
+                                System.out.flush();
+                                System.out.println(String.format("\n[1] View cart (%s)\n[2] Add Listing\n[3] Browse market Services\n[4] Browse ordered Services (%s)\n[5] Exit",(cartItems.size()), (bookedSrve.size())));
+                            break;
+                            default:
+                                // invalid input
+                                System.out.print("\033[H1\033[2J");
+                                System.out.flush();
+                                System.err.println("Err: Invalid input please try again.\n");
+                                System.out.println(String.format(
+                                        "\n[1] View cart (%s)\n[2] Add Listing\n[3] Browse market Services\n[4] Browse ordered Services (%s)\n[5] Exit",
+                                        (cartItems.size()), (bookedSrve.size())));
+                            break;
                         }
                         break;
                     case 4:
-                        for (String listingSelect : listings) {
-                            int posNamount = 0;
-                            String listingItemCat = "";
-                            String listingItemCost = "";
-                            String listingItemName = "";
-                            String listingItemID = "";
-                            String listingItemDesc = "";
-                            String listingItemType = "";
-                            for (int letterPOS = 0; letterPOS < listingSelect.length(); letterPOS++){
-                                if (listingSelect.charAt(letterPOS) == '^') {
+                        System.out.print("\033[H1\033[2J");
+                        System.out.flush();
+                      System.out.println(String.format("These are your Ordered services:\n\n[1] Cancel an Order\n[2] Return to Main Menu"));
+                        for (String bookedE : bookedSrve) {
+                                int posNamount = 0;
+                                String bookedItemCost = "";
+                                String bookedItemName = "";
+                                String bookedItemID = "";
+                            for (int letterPOS = 0; letterPOS < bookedE.length(); letterPOS++){
+                                if (bookedE.charAt(letterPOS) == '^') {
                                     posNamount += 1;
                                 } else {
                                     // Organize values to variables
                                     switch (posNamount) {
-                                        case 0:
-                                            listingItemCat += listingSelect.charAt(letterPOS);
-                                            break;
                                         case 1:
-                                            listingItemID += listingSelect.charAt(letterPOS);
+                                            bookedItemID += bookedE.charAt(letterPOS);
                                             break;
                                         case 2:
-                                            listingItemName += listingSelect.charAt(letterPOS);
-                                            break;
-                                        case 3:
-                                            listingItemType += listingSelect.charAt(letterPOS);
+                                            bookedItemName += bookedE.charAt(letterPOS);
                                             break;
                                         case 4:
-                                            listingItemCost += listingSelect.charAt(letterPOS);
-                                            break;
-                                        case 5:
-                                            listingItemDesc += listingSelect.charAt(letterPOS);
-                                            break;
-                                        case 6:
+                                            bookedItemCost += bookedE.charAt(letterPOS);
                                             break;
                                     }
                                 }
                             }
-                             System.out.println(String.format("ID:%s\nName:%s\nCat:%s\nType:%s\nCost:%s\nDesc%s", listingItemID, listingItemName, listingItemCat, listingItemType, listingItemCost, listingItemDesc));   
+                             System.out.println(String.format("\n%s : Paid $%s\nID:%s", bookedItemName, bookedItemCost, bookedItemID));
                         }
+                        switch (Integer.parseInt(sc.nextLine())) {
+                            case 1:
+                              System.out.print("\033[H1\033[2J");
+                              System.out.flush();
+                              System.out.println("Type ID of item you wish to remove:");
+                                String removID = sc.nextLine();
+                                boolean anItemRemov = false;
+                                for (int arrySelec = 0; arrySelec < bookedSrve.size(); arrySelec++) {
+                                    if (bookedSrve.get(arrySelec).contains(removID)) {
+                                        bookedSrve.remove(arrySelec);
+                                        // clear!
+                                        System.out.print("\033[H1\033[2J");
+                                        System.out.flush();
+                                        anItemRemov = true;
+                                        System.out.println(String.format("\nItem %s successfully removed!", removID));
+                                    }
+                                }
+                                if (!anItemRemov) {
+                                    System.out.print("\033[H1\033[2J");
+                                    System.out.flush();
+                                    System.out.print(
+                                            "Err: Failed to find Item, Are you sure you typed the correct ID?\n");
+                                }
+                                System.out.println(String.format(
+                                        "\n[1] View cart (%s)\n[2] Add Listing\n[3] Browse market Services\n[4] Browse ordered Services (%s)\n[5] Exit",
+                                        (cartItems.size()), (bookedSrve.size())));
+
+                            break;
+                            case 2:
+                            System.out.println(String.format(
+                                        "\n[1] View cart (%s)\n[2] Add Listing\n[3] Browse market Services\n[4] Browse ordered Services (%s)\n[5] Exit",
+                                        (cartItems.size()), (bookedSrve.size())));
+                            break;
+                        }
+
                         break;
 
                     case 5:
                         notExited = false;
+                        System.out.print("\033[H1\033[2J");
+                        System.out.flush();
+                        System.out.println("Thanks for using Marketplacey\n You can now exit the program!");
                         break;
-                    
-
+                        
 
                 }
 
-            } else {
-                // Exit code here!!!
-                System.out.println("Thanks for using Marketplacey\n Bye!!");
             }
 
                 }
